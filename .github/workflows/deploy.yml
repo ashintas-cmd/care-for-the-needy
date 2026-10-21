@@ -34,6 +34,9 @@ jobs:
         env:
           CI: 'false'
 
+      - name: Install backend dependencies
+        run: npm install --prefix backend --no-audit --no-fund
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
