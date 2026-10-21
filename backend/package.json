@@ -1,0 +1,32 @@
+{
+  "name": "care-for-the-needy-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Care for the Needy Patients - Clinical Trials Platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "sync:ctri": "node scripts/syncCTRI.js",
+    "sync:ctri:full": "node scripts/syncCTRI.js --full",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^6.4.0",
+    "playwright": "^1.40.0",
+    "axios": "^1.6.0",
+    "express-rate-limit": "^7.1.0",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "express-validator": "^7.0.1",
+    "node-cron": "^3.0.3",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0"
+  }
+}

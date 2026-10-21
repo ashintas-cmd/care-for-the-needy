@@ -1,0 +1,232 @@
+.awareness-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.awareness-modal {
+  background: white;
+  border-radius: 24px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.awareness-header {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  padding: 32px;
+  text-align: center;
+  border-radius: 24px 24px 0 0;
+}
+
+.awareness-header-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.awareness-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.awareness-header p {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.awareness-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 20px 32px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.awareness-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.awareness-tab:hover {
+  border-color: var(--tab-color);
+  color: var(--tab-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.awareness-tab.active {
+  border-color: var(--tab-color);
+  background: var(--tab-color);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tab-icon {
+  font-size: 18px;
+}
+
+.awareness-content {
+  padding: 32px;
+  min-height: 200px;
+}
+
+.content-card {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 32px;
+  border-left: 6px solid;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.content-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.content-card h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.content-card p {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.8;
+}
+
+.awareness-footer {
+  padding: 24px 32px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 24px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-info p {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.footer-info a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer-info a:hover {
+  text-decoration: underline;
+}
+
+.footer-note {
+  font-size: 12px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.close-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.close-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .awareness-modal {
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .awareness-header {
+    padding: 24px;
+  }
+
+  .awareness-header h2 {
+    font-size: 22px;
+  }
+
+  .awareness-tabs {
+    padding: 16px;
+  }
+
+  .awareness-tab {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .tab-title {
+    display: none;
+  }
+
+  .awareness-content {
+    padding: 20px;
+  }
+
+  .content-card {
+    padding: 20px;
+  }
+
+  .awareness-footer {
+    flex-direction: column;
+    text-align: center;
+  }
+}
