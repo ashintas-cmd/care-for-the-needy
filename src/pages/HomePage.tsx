@@ -128,7 +128,7 @@ const HomePage: React.FC = () => {
           </form>
 
           <div className="quick-filters">
-            {conditions.map(condition => (
+            {conditions.slice(0, 8).map(condition => (
               <button
                 key={condition}
                 className="filter-chip"

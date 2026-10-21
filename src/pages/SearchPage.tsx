@@ -18,7 +18,9 @@ const SearchPage: React.FC = () => {
   const [condition, setCondition] = useState(searchParams.get('condition') || 'All');
   const [state, setState] = useState('All');
   const [phase, setPhase] = useState('All');
-  const [results, setResults] = useState<Trial[]>([]);
+  const [rawResults, setRawResults] = useState<Trial[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [options, setOptions] = useState<FilterOptions>(emptyOptions);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -66,16 +68,15 @@ const SearchPage: React.FC = () => {
       phase: phase !== 'All' ? phase : undefined,
       limit: 100
     })
-      .then(({ trials }) => {
+      .then(({ trials, pagination }) => {
         if (cancelled) return;
-        const filtered = c !== 'All'
-          ? trials.filter(t => t.condition.toLowerCase().includes(c.toLowerCase()))
-          : trials;
-        setResults(filtered);
+        setRawResults(trials);
+        setHasMore(Boolean(pagination && pagination.hasMore));
       })
       .catch(err => {
         if (!cancelled) {
-          setResults([]);
+          setRawResults([]);
+          setHasMore(false);
           setError(err instanceof Error ? err.message : 'Failed to load trials');
         }
       })
@@ -95,6 +96,39 @@ const SearchPage: React.FC = () => {
     if (condition !== 'All') params.condition = condition;
     setSearchParams(params);
   };
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    setError('');
+
+    try {
+      const q = searchParams.get('q') || '';
+      const c = searchParams.get('condition') || 'All';
+
+      const { trials, pagination } = await fetchTrials({
+        q: q || undefined,
+        condition: !q && c !== 'All' ? c : undefined,
+        state: state !== 'All' ? state : undefined,
+        phase: phase !== 'All' ? phase : undefined,
+        limit: 100,
+        offset: rawResults.length
+      });
+
+      setRawResults(prev => {
+        const ids = new Set(prev.map(item => item.id));
+        return [...prev, ...trials.filter(item => !ids.has(item.id))];
+      });
+      setHasMore(Boolean(pagination && pagination.hasMore));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load more trials');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const results = condition !== 'All'
+    ? rawResults.filter(t => t.condition.toLowerCase().includes(condition.toLowerCase()))
+    : rawResults;
 
   const clearFilters = () => {
     setQuery('');
@@ -201,7 +235,7 @@ const SearchPage: React.FC = () => {
           ) : error ? (
             <span style={{ color: '#b91c1c' }}>Could not load trials. {error}</span>
           ) : (
-            <>Found <strong>{results.length}</strong> recruiting trials</>
+            <>Found <strong>{results.length}{hasMore ? '+' : ''}</strong> recruiting trials</>
           )}
         </div>
 
@@ -232,11 +266,34 @@ const SearchPage: React.FC = () => {
         </div>
 
         {!loading && !error && results.length > 0 && (
-          <div className="trials-grid">
-            {results.map(trial => (
-              <TrialCard key={trial.id} trial={trial} />
-            ))}
-          </div>
+          <>
+            <div className="trials-grid">
+              {results.map(trial => (
+                <TrialCard key={trial.id} trial={trial} />
+              ))}
+            </div>
+
+            {hasMore && (
+              <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  style={{
+                    padding: '12px 28px',
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: loadingMore ? 'wait' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 600
+                  }}
+                >
+                  {loadingMore ? 'Loading...' : 'Load more trials'}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {!loading && !error && results.length === 0 && (
