@@ -98,6 +98,54 @@ ctri-explorer/
 └── tsconfig.json
 ```
 
+## Firestore Setup
+
+Trial data and patient queries are stored in **Cloud Firestore**.
+
+1. The backend reads credentials from `backend/.env.backend`
+   (see `backend/.env.example`).
+2. Set `FIREBASE_PROJECT_ID`, `FIRESTORE_DATABASE_ID` and
+   `GOOGLE_APPLICATION_CREDENTIALS` (path to a service-account JSON).
+3. Never commit the service-account file, `.env.backend`, or any private key.
+   Both are already listed in `.gitignore`.
+
+Collections used by the app:
+
+| Collection | Purpose |
+|---|---|
+| `trials` | Clinical trial listings shown on the website |
+| `patientQueries` | Queries submitted through the patient form |
+| `alerts`, `reports`, `users` | Supporting data |
+
+## Admin Panel
+
+The patient-query admin panel is available at `/admin`.
+
+- Sign-in uses **Firebase Authentication** (email + password).
+- Access requires the custom claim `role: "admin"`.
+- Admins can search queries, update status
+  (Pending → Contacted → Closed) and download a CSV for Excel.
+
+Grant admin access to an account:
+
+```bash
+cd backend
+node scripts/makeAdmin.js someone@example.com
+```
+
+The person must sign out and sign in again for the new role to apply.
+On first use, click **"Forgot password?"** on the login page to set a password.
+
+## Deployment
+
+```bash
+npm run build
+firebase deploy --only hosting,functions
+```
+
+`firebase.json` rewrites `/api/**` to the `api` Cloud Function, so the
+frontend and API are served from the same domain.
+
 ## Disclaimer
 
 This platform is for **awareness purposes only**. It is not intended for advertisement or promotion of any specific trial or treatment. Always consult your healthcare provider before making any medical decisions.
