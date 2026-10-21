@@ -26,7 +26,7 @@ const fs = require('fs');
 const os = require('os');
 const { chromium } = require('playwright');
 const { XMLParser } = require('fast-xml-parser');
-const { initializeFirebase, getDb } = require('../src/utils/firebase');
+const { Firestore } = require('@google-cloud/firestore');
 const { logger } = require('../src/utils/logger');
 
 const DEFAULT_URL = 'https://trialsearch.who.int/Default.aspx';
@@ -272,8 +272,14 @@ async function commitBatch(db, ops) {
 }
 
 async function main() {
-  initializeFirebase();
-  const db = getDb();
+  // Use the Firestore client directly: it supports both a local service
+  // account file and workload identity federation (GitHub Actions), unlike
+  // firebase-admin's applicationDefault().
+  const db = new Firestore({
+    projectId: process.env.FIREBASE_PROJECT_ID || 'care-for-the-needy-patients',
+    databaseId: process.env.FIRESTORE_DATABASE_ID || '(default)'
+  });
+  db.settings({ ignoreUndefinedProperties: true });
 
   const stateRef = db.collection(STATE_DOC.collection).doc(STATE_DOC.id);
   const stateSnap = await stateRef.get();
