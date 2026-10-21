@@ -1,0 +1,81 @@
+name: Sync CTRI trials
+
+on:
+  schedule:
+    # Daily check; the sync itself runs only when 15 days have passed.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      scans:
+        description: 'Comma-separated ICTRP queries, e.g. CTRI/2026/10,CTRI/2026/09 (blank = current + previous month)'
+        required: false
+        default: ''
+      prune:
+        description: 'Delete trials in the scanned months that are no longer recruiting'
+        type: boolean
+        default: true
+      refreshLimit:
+        description: 'How many stored trials to re-check for recruitment status (0 = none)'
+        required: false
+        default: '100'
+      dryRun:
+        description: 'Dry run (export only, no Firestore writes)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ctri-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium for Playwright
+        working-directory: backend
+        run: npx playwright install --with-deps chromium
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run CTRI sync
+        working-directory: backend
+        env:
+          SCANS: ${{ github.event.inputs.scans }}
+          PRUNE: ${{ github.event.inputs.prune }}
+          REFRESH_LIMIT: ${{ github.event.inputs.refreshLimit }}
+          DRY_RUN: ${{ github.event.inputs.dryRun }}
+          IS_SCHEDULE: ${{ github.event_name == 'schedule' }}
+          DEFAULT_REFRESH_LIMIT: '100'
+        run: |
+          args=()
+          if [ "$IS_SCHEDULE" = "true" ]; then args+=("--if-due"); fi
+          if [ -n "$SCANS" ]; then args+=("--scan=$SCANS"); fi
+          if [ "$PRUNE" != "false" ]; then args+=("--prune"); fi
+          if [ "$DRY_RUN" = "true" ]; then args+=("--dry-run"); fi
+          if [ -z "$REFRESH_LIMIT" ]; then REFRESH_LIMIT="$DEFAULT_REFRESH_LIMIT"; fi
+          if [ "$REFRESH_LIMIT" != "0" ]; then args+=("--refresh-existing" "--refresh-limit=$REFRESH_LIMIT"); fi
+          echo "Running: node scripts/syncICTRP.js ${args[*]}"
+          node scripts/syncICTRP.js "${args[@]}"
