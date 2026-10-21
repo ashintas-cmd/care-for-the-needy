@@ -47,6 +47,9 @@ const Footer: React.FC = () => {
             Disclaimer: This website is for awareness purposes only. Always consult your doctor before participating in any clinical trial.
           </p>
           <p style={{ marginTop: '8px', fontSize: '12px' }}>
+            Trial data is sourced from the Clinical Trials Registry - India (CTRI) via the WHO ICTRP and refreshed every 15 days.
+          </p>
+          <p style={{ marginTop: '8px', fontSize: '12px' }}>
             <Link to="/admin" style={{ color: 'inherit', opacity: 0.75 }}>Admin Login</Link>
           </p>
         </div>

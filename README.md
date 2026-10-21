@@ -136,6 +136,40 @@ node scripts/makeAdmin.js someone@example.com
 The person must sign out and sign in again for the new role to apply.
 On first use, click **"Forgot password?"** on the login page to set a password.
 
+## Automated CTRI Sync (every 15 days)
+
+CTRI's public search requires a CAPTCHA and its trial detail pages require a
+login, so direct unattended scraping is not possible. The sync therefore uses
+the **WHO ICTRP XML export**, which mirrors CTRI registrations and is refreshed
+weekly.
+
+Workflow: `.github/workflows/sync-ctri.yml`
+
+- Runs daily at 02:00 UTC and only proceeds when `syncState/ctri.nextRunAt`
+  is due, giving a 15-day interval.
+- Scans the current and previous registration month.
+- Imports only trials with `Recruitment_Status = Recruiting`, upserting by CTRI
+  number (`trials` collection).
+- `--prune` deletes trials in the scanned months that are no longer recruiting.
+- `--refresh-existing --refresh-limit=100` re-checks a rotating slice of stored
+  trials on every run and deletes any that have left the recruiting phase.
+
+Manual backfill / testing:
+
+```bash
+# GitHub Actions
+gh workflow run sync-ctri.yml -f scans="CTRI/2025/01,CTRI/2025/02" -f prune=true
+
+# Local (uses backend/.env.backend credentials)
+cd backend
+node scripts/syncICTRP.js --scan=CTRI/2026/10 --dry-run
+node scripts/syncICTRP.js --scan=CTRI/2026/10 --prune
+node scripts/syncICTRP.js --refresh-existing --refresh-limit=50
+```
+
+In GitHub Actions, authentication uses Workload Identity Federation
+(`github-deployer` service account) - no long-lived key is stored.
+
 ## Deployment
 
 ```bash
