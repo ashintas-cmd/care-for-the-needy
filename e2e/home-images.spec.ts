@@ -125,6 +125,54 @@ test.describe('Home page photography', () => {
   });
 });
 
+test.describe('Condition data quality', () => {
+  test('stats API returns clean, ranked condition names', async ({ request }) => {
+    // First call after a deployment pays a Cloud Functions cold start.
+    test.setTimeout(90_000);
+
+    const response = await request.get('/api/trials/stats');
+    test.skip(response.status() !== 200, 'stats API is not available in this environment');
+
+    const body = await response.json();
+    const conditions: string[] = body?.data?.conditions || [];
+
+    expect(conditions.length).toBeGreaterThan(0);
+
+    for (const condition of conditions) {
+      // The old importer leaked ICTRP slot labels into the stored value.
+      expect(condition, `${condition}`).not.toMatch(/Health Condition\s*\d+/i);
+      // ...and leading ICD-10 codes such as "D49- " or "M055- ".
+      expect(condition, `${condition}`).not.toMatch(/^[A-Z]\d{2,3}\s*[-–:]/);
+      expect(condition.trim().length).toBeGreaterThan(1);
+    }
+  });
+
+  test('hero condition chips are readable', async ({ page }) => {
+    await page.goto('/');
+    await dismissAwarenessBanner(page);
+
+    const chips = page.locator('.hero .quick-filters .filter-chip');
+    await expect(chips.first()).toBeVisible({ timeout: 15_000 }).catch(() => undefined);
+
+    const labels = await chips.allTextContents();
+    test.skip(labels.length === 0, 'trial API is not available in this environment');
+
+    for (const label of labels) {
+      expect(label).not.toMatch(/Health Condition\s*\d+/i);
+      expect(label.trim()).not.toMatch(/^[-–—,;:]/);
+      expect(label.trim().length).toBeGreaterThan(1);
+    }
+
+    // The API ranks conditions by how many trials mention them; the UI must
+    // keep that order instead of falling back to alphabetical.
+    const statsResponse = await page.request.get('/api/trials/stats');
+    if (statsResponse.ok()) {
+      const stats = await statsResponse.json();
+      expect(labels[0]).toBe(stats.data.conditions[0]);
+    }
+  });
+});
+
 test.describe('Home page mobile layout', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

@@ -28,6 +28,7 @@ const { chromium } = require('playwright');
 const { XMLParser } = require('fast-xml-parser');
 const { Firestore } = require('@google-cloud/firestore');
 const { logger } = require('../src/utils/logger');
+const { parseCondition } = require('../src/utils/condition');
 
 const DEFAULT_URL = 'https://trialsearch.who.int/Default.aspx';
 const SYNC_INTERVAL_DAYS = 15;
@@ -88,12 +89,6 @@ const firstSentence = value => {
   const cut = v.split(/Method of generating|Method of allocation|Blinding and masking/i)[0];
   return cut.trim();
 };
-
-const parseCondition = value =>
-  clean(value)
-    .replace(/^Health Condition \d+:\s*/i, '')
-    .replace(/^[A-Z]\d{2,3}\s*-\s*/i, '')
-    .trim();
 
 const parseIntervention = value => {
   const v = clean(value);

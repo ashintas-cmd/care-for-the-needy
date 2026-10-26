@@ -50,6 +50,22 @@ npm run sync:ctri
 npm run sync:ctri:full
 ```
 
+### 5. Maintenance Scripts
+
+```bash
+# Re-clean the stored `condition` values after an importer change
+node scripts/repairConditions.js --dry-run   # preview
+node scripts/repairConditions.js             # apply
+
+# Seed the home page image metadata (Firestore `siteImages`)
+node scripts/seedSiteImages.js
+```
+
+The ICTRP `Condition` field is normalised by `src/utils/condition.js`, which
+strips "Health Condition N:" slot labels, ICD-10 codes and WHO study-domain
+labels (`O- Medical and Surgical`, `1- Obstetrics`). It is covered by
+`npm test` in this folder.
+
 ## API Endpoints
 
 ### Trials
@@ -58,11 +74,17 @@ npm run sync:ctri:full
 |--------|----------|-------------|
 | GET | `/api/trials` | Search trials with filters |
 | GET | `/api/trials/recruiting` | Get recruiting trials |
-| GET | `/api/trials/stats` | Get trial statistics |
+| GET | `/api/trials/stats` | Get trial statistics (conditions ranked by frequency, cached ~10 min) |
 | GET | `/api/trials/:id` | Get trial by ID |
 | POST | `/api/trials` | Create trial (admin) |
 | PUT | `/api/trials/:id` | Update trial (admin) |
 | DELETE | `/api/trials/:id` | Delete trial (admin) |
+
+### Images
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/images` | Home page image metadata from the `siteImages` collection |
 
 ### Auth
 

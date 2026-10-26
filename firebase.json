@@ -9,7 +9,8 @@
       ".env",
       "firebase-service-account.json",
       "logs",
-      "scripts"
+      "scripts",
+      "test"
     ]
   },
   "hosting": {

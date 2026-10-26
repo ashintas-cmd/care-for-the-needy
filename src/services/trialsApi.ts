@@ -171,10 +171,17 @@ export async function fetchStats(): Promise<TrialStats> {
   const body = await request<{ data?: any }>('/api/trials/stats');
   const data = body?.data || {};
 
+  // Conditions arrive ranked by how many trials mention them (the API caps the
+  // list), so de-duplicate without re-sorting - alphabetical order would push
+  // the most relevant conditions off the home page chips.
+  const rankedConditions = Array.from(
+    new Set(list<unknown>(data.conditions).map(text).filter(Boolean))
+  );
+
   return {
     total: num(data.total),
     recruiting: num(data.recruiting),
-    conditions: unique(list<unknown>(data.conditions).map(text)),
+    conditions: rankedConditions,
     states: unique(list<unknown>(data.states).map(text)),
     phases: unique(list<unknown>(data.phases).map(text))
   };

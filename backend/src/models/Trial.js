@@ -1,6 +1,16 @@
 const { getDb } = require('../utils/firebase');
+const { parseCondition } = require('../utils/condition');
 
 const COLLECTION_NAME = 'trials';
+
+// The registry carries thousands of distinct condition strings, which makes an
+// unfiltered list useless for filter chips and dropdowns. The API returns the
+// most common ones, ranked by how many trials mention them.
+const MAX_CONDITIONS = 100;
+
+// How long an aggregated stats result stays valid for a warm function instance.
+const STATS_TTL_MS = 10 * 60 * 1000;
+let statsCache = { data: null, expiresAt: 0 };
 
 class Trial {
   constructor(data) {
@@ -171,33 +181,58 @@ class Trial {
   }
 
   static async getStats() {
+    // The home page calls this on every visit, and the collection is scanned to
+    // aggregate conditions, so cache the result per function instance.
+    if (statsCache.data && Date.now() < statsCache.expiresAt) {
+      return statsCache.data;
+    }
+
     const db = getDb();
-    const totalSnapshot = await db.collection(COLLECTION_NAME).count().get();
-    const recruitingSnapshot = await db.collection(COLLECTION_NAME)
-      .where('recruitmentStatus', '==', 'Recruiting')
-      .count()
+
+    // One field-scoped read instead of three round trips (two count queries
+    // plus a full document fetch).
+    const snapshot = await db
+      .collection(COLLECTION_NAME)
+      .select('condition', 'state', 'phase', 'recruitmentStatus')
       .get();
 
-    // Get unique conditions
-    const allTrials = await db.collection(COLLECTION_NAME).get();
-    const conditions = new Set();
+    let total = 0;
+    let recruiting = 0;
+    const conditionCounts = new Map();
     const states = new Set();
     const phases = new Set();
 
-    allTrials.docs.forEach(doc => {
+    snapshot.docs.forEach(doc => {
       const data = doc.data();
-      if (data.condition) conditions.add(data.condition);
-      if (data.state) states.add(data.state);
-      if (data.phase) phases.add(data.phase);
+      total++;
+      if (data.recruitmentStatus === 'Recruiting') recruiting++;
+
+      // Normalise on read as well as on write: rows that predate the parser fix
+      // would otherwise keep leaking "Health Condition 2:" fragments.
+      const condition = parseCondition(data.condition);
+      if (condition) {
+        conditionCounts.set(condition, (conditionCounts.get(condition) || 0) + 1);
+      }
+
+      if (data.state) states.add(String(data.state).trim());
+      if (data.phase) phases.add(String(data.phase).trim());
     });
 
-    return {
-      total: totalSnapshot.data().count,
-      recruiting: recruitingSnapshot.data().count,
-      conditions: Array.from(conditions),
-      states: Array.from(states),
-      phases: Array.from(phases)
+    const conditions = Array.from(conditionCounts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, MAX_CONDITIONS)
+      .map(([condition]) => condition);
+
+    const stats = {
+      total,
+      recruiting,
+      conditions,
+      states: Array.from(states).sort((a, b) => a.localeCompare(b)),
+      phases: Array.from(phases).sort((a, b) => a.localeCompare(b))
     };
+
+    statsCache = { data: stats, expiresAt: Date.now() + STATS_TTL_MS };
+    return stats;
   }
 
   toJSON() {
