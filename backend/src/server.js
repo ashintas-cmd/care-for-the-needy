@@ -23,6 +23,7 @@ const syncRoutes = require('./routes/sync');
 const reportRoutes = require('./routes/reports');
 const alertRoutes = require('./routes/alerts');
 const queryRoutes = require('./routes/queries');
+const imageRoutes = require('./routes/images');
 const { errorHandler } = require('./middleware/errorHandler');
 const { logger } = require('./utils/logger');
 
@@ -73,6 +74,7 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/queries', queryRoutes);
+app.use('/api/images', imageRoutes);
 
 // 404 handler
 app.use((req, res) => {

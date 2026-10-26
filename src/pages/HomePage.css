@@ -1,6 +1,219 @@
+/* ---------------------------------------------------------------- *
+ * Home hero - split layout with the "People Today" collage image
+ * ---------------------------------------------------------------- */
+.hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 48px;
+  align-items: center;
+  text-align: left;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero .hero-copy h2 {
+  margin-bottom: 16px;
+}
+
+.hero .hero-copy p {
+  margin: 0 0 28px;
+  max-width: 560px;
+}
+
+.hero .search-container {
+  margin: 0;
+  max-width: 560px;
+}
+
+.hero .quick-filters {
+  justify-content: flex-start;
+}
+
+.hero-visual {
+  margin: 0;
+  aspect-ratio: 3 / 2;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #dbeafe;
+  box-shadow: 0 24px 48px -16px rgba(15, 23, 42, 0.35);
+}
+
+.hero-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------------------------------------------------------------- *
+ * Care section - care-at-home photo beside supporting copy
+ * ---------------------------------------------------------------- */
+.care-section {
+  padding: 64px 0;
+  background: white;
+  border-top: 1px solid var(--border);
+}
+
+.care-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.care-visual {
+  margin: 0;
+  width: 100%;
+  /* The source photo is 349px wide - never upscale it past its native size. */
+  max-width: 380px;
+  justify-self: center;
+  padding: 14px 14px 16px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 18px 36px -20px rgba(15, 23, 42, 0.4);
+}
+
+.care-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: #e2e8f0;
+}
+
+.care-visual figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-light);
+  text-align: center;
+}
+
+.care-eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.care-copy h2 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.care-copy p {
+  font-size: 16px;
+  color: var(--text-light);
+  max-width: 580px;
+  margin-bottom: 20px;
+}
+
+.care-points {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  max-width: 580px;
+}
+
+.care-points li {
+  position: relative;
+  padding-left: 32px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.care-points li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 21px;
+  height: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.14);
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 980px) {
+  .hero-inner,
+  .care-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .hero-inner {
+    text-align: center;
+  }
+
+  .hero .hero-copy p,
+  .hero .search-container {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero .quick-filters {
+    justify-content: center;
+  }
+
+  .hero-visual {
+    width: 100%;
+    max-width: 620px;
+    justify-self: center;
+  }
+
+  .care-copy h2 {
+    font-size: 26px;
+  }
+
+  .care-points {
+    text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero-eyebrow {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+
+  .care-section {
+    padding: 44px 0;
+  }
+
+  .care-visual {
+    max-width: 100%;
+  }
+}
+
 /* Patient Awareness Section */
-.awareness-section {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+.awareness-section {  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   padding: 60px 0;
   border-top: 4px solid #f59e0b;
   border-bottom: 4px solid #f59e0b;

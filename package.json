@@ -18,9 +18,14 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "eject": "react-scripts eject",
     "deploy": "npm run build && firebase deploy",
     "deploy:hosting": "npm run build && firebase deploy --only hosting"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
   },
   "browserslist": {
     "production": [

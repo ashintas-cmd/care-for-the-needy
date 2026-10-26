@@ -13,15 +13,128 @@
   backdrop-filter: blur(8px);
 }
 
+.awareness-modal-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+}
+
 .awareness-modal {
   background: white;
   border-radius: 24px;
-  max-width: 900px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  scroll-behavior: smooth;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   animation: modalSlideIn 0.4s ease-out;
+}
+
+/* Scroll-down cue */
+.scroll-hint-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 28px 16px 14px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  border-radius: 0 0 24px 24px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.85) 45%,
+    rgba(248, 250, 252, 0.98) 100%
+  );
+  animation: hintFadeIn 0.35s ease-out;
+}
+
+@keyframes hintFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.scroll-hint {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.97);
+  color: #1d4ed8;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -8px rgba(15, 23, 42, 0.4);
+  animation: hintPulse 2.2s ease-in-out infinite;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.scroll-hint:hover,
+.scroll-hint:focus-visible {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+  outline: none;
+}
+
+.scroll-hint-chevrons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 14px;
+  height: 16px;
+}
+
+.chevron {
+  width: 8px;
+  height: 8px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  animation: chevronBounce 1.4s ease-in-out infinite;
+}
+
+.chevron:nth-child(2) {
+  opacity: 0.55;
+  animation-delay: 0.2s;
+}
+
+@keyframes hintPulse {
+  0%, 100% {
+    box-shadow: 0 10px 24px -8px rgba(15, 23, 42, 0.4), 0 0 0 0 rgba(37, 99, 235, 0.35);
+  }
+  50% {
+    box-shadow: 0 10px 24px -8px rgba(15, 23, 42, 0.4), 0 0 0 8px rgba(37, 99, 235, 0);
+  }
+}
+
+@keyframes chevronBounce {
+  0%, 100% {
+    opacity: 0.25;
+    transform: rotate(45deg) translate(0, 0);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(45deg) translate(2px, 2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint,
+  .chevron {
+    animation: none;
+  }
+
+  .awareness-modal {
+    scroll-behavior: auto;
+  }
 }
 
 @keyframes modalSlideIn {
@@ -35,7 +148,9 @@
   }
 }
 
-.awareness-header {
+/* Scoped to the modal: `.awareness-header` is also used by the home page
+   section, so an unscoped rule leaks this blue banner onto the home page. */
+.awareness-modal .awareness-header {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
   padding: 32px;
@@ -48,13 +163,13 @@
   margin-bottom: 12px;
 }
 
-.awareness-header h2 {
+.awareness-modal .awareness-header h2 {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
-.awareness-header p {
+.awareness-modal .awareness-header p {
   font-size: 16px;
   opacity: 0.9;
 }
@@ -196,11 +311,21 @@
     border-radius: 16px;
   }
 
-  .awareness-header {
+  .scroll-hint-layer {
+    border-radius: 0 0 16px 16px;
+    padding: 22px 12px 10px;
+  }
+
+  .scroll-hint {
+    padding: 9px 16px;
+    font-size: 12px;
+  }
+
+  .awareness-modal .awareness-header {
     padding: 24px;
   }
 
-  .awareness-header h2 {
+  .awareness-modal .awareness-header h2 {
     font-size: 22px;
   }
 

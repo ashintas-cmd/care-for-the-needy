@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import TrialCard from '../components/TrialCard';
 import PatientQueryForm from '../components/PatientQueryForm';
 import { fetchStats, fetchTrials, TrialStats } from '../services/trialsApi';
+import { imageForSlot } from '../services/imagesApi';
+import useSiteImages from '../hooks/useSiteImages';
 import type { Trial } from '../data/trials';
 import './HomePage.css';
 
@@ -20,6 +22,9 @@ const HomePage: React.FC = () => {
   const [stats, setStats] = useState<TrialStats>(emptyStats);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { images: siteImages } = useSiteImages();
+  const heroImage = imageForSlot(siteImages, 'hero');
+  const careImage = imageForSlot(siteImages, 'care');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -107,37 +112,50 @@ const HomePage: React.FC = () => {
     <div>
       {/* Hero Section */}
       <section className="hero">
-        <div className="container">
-          <h2>Find Clinical Trials in India</h2>
-          <p>
-            Search for recruiting clinical trials across India. Get information about trial locations,
-            eligibility criteria, and contact details. Our mission is to make clinical trial information
-            accessible to all patients.
-          </p>
+        <div className="container hero-inner">
+          <div className="hero-copy">
+            <span className="hero-eyebrow">Care for the Needy · Patient Awareness</span>
+            <h2>Find Clinical Trials in India</h2>
+            <p>
+              Search for recruiting clinical trials across India. Get information about trial locations,
+              eligibility criteria, and contact details. Our mission is to make clinical trial information
+              accessible to all patients.
+            </p>
 
-          <form onSubmit={handleSearch} className="search-container">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search by disease, condition, drug, or location..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button type="submit">Search Trials</button>
+            <form onSubmit={handleSearch} className="search-container">
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Search by disease, condition, drug, or location..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button type="submit">Search Trials</button>
+              </div>
+            </form>
+
+            <div className="quick-filters">
+              {conditions.slice(0, 8).map(condition => (
+                <button
+                  key={condition}
+                  className="filter-chip"
+                  onClick={() => handleConditionClick(condition)}
+                >
+                  {condition}
+                </button>
+              ))}
             </div>
-          </form>
-
-          <div className="quick-filters">
-            {conditions.slice(0, 8).map(condition => (
-              <button
-                key={condition}
-                className="filter-chip"
-                onClick={() => handleConditionClick(condition)}
-              >
-                {condition}
-              </button>
-            ))}
           </div>
+
+          <figure className="hero-visual">
+            <img
+              src={heroImage.src}
+              alt={heroImage.alt}
+              width={heroImage.width}
+              height={heroImage.height}
+              decoding="async"
+            />
+          </figure>
         </div>
       </section>
 
@@ -181,6 +199,38 @@ const HomePage: React.FC = () => {
                 <div className="stat-label">{stat.label}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Care Section */}
+      <section className="care-section">
+        <div className="container care-grid">
+          <figure className="care-visual">
+            <img
+              src={careImage.src}
+              alt={careImage.alt}
+              width={careImage.width}
+              height={careImage.height}
+              loading="lazy"
+              decoding="async"
+            />
+            {careImage.caption && <figcaption>{careImage.caption}</figcaption>}
+          </figure>
+
+          <div className="care-copy">
+            <span className="care-eyebrow">Beyond the trial</span>
+            <h2>Care that reaches the bedside</h2>
+            <p>
+              A clinical trial is only one part of a patient's journey. Behind every listing on this
+              platform is a person — often an older parent, a spouse or a child — looking for clear,
+              honest information and dignified care close to home.
+            </p>
+            <ul className="care-points">
+              <li>Every trial is linked back to the original CTRI registry entry for verification</li>
+              <li>Free to use, always — this platform is a social initiative, not a paid service</li>
+              <li>Written for patients and caregivers, not only for researchers</li>
+            </ul>
           </div>
         </div>
       </section>

@@ -619,12 +619,44 @@ body {
     grid-template-columns: 1fr;
   }
 
+  /* Keep the menu reachable on phones instead of hiding it entirely. */
   .nav {
-    display: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .nav button {
+    padding: 8px 14px;
+    font-size: 13px;
   }
 
   .header-main .container {
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
+  }
+
+  /* The logo used to overflow the viewport on narrow phones. */
+  .logo {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .logo-text {
+    min-width: 0;
+  }
+
+  .logo-text h1 {
+    font-size: 18px;
+  }
+
+  .logo-text p {
+    font-size: 11px;
+  }
+
+  .header-top {
+    font-size: 11px;
   }
 }

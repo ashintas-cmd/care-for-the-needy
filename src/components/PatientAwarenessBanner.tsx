@@ -1,9 +1,47 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './PatientAwarenessBanner.css';
 
 const PatientAwarenessBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Show the "scroll down" hint only while there is more content below.
+  const updateScrollHint = useCallback(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+    const canScroll = modal.scrollHeight - modal.clientHeight > 24;
+    const atBottom = modal.scrollTop + modal.clientHeight >= modal.scrollHeight - 24;
+    setShowScrollHint(canScroll && !atBottom);
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    updateScrollHint();
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    // Re-check when the modal content grows/shrinks (tab switch, fonts, resize).
+    const observer = new ResizeObserver(updateScrollHint);
+    observer.observe(modal);
+    window.addEventListener('resize', updateScrollHint);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateScrollHint);
+    };
+  }, [isVisible, activeTab, updateScrollHint]);
+
+  const handleScrollDown = () => {
+    const modal = modalRef.current;
+    if (!modal) return;
+    modal.scrollBy({
+      top: Math.max(modal.clientHeight * 0.75, 240),
+      behavior: 'smooth'
+    });
+  };
 
   if (!isVisible) return null;
 
@@ -60,49 +98,68 @@ const PatientAwarenessBanner: React.FC = () => {
 
   return (
     <div className="awareness-overlay">
-      <div className="awareness-modal">
-        <div className="awareness-header">
-          <div className="awareness-header-icon">📢</div>
-          <h2>Patient Awareness Platform</h2>
-          <p>Important Patient Information and Disclaimer</p>
-        </div>
+      <div className="awareness-modal-wrap">
+        <div className="awareness-modal" ref={modalRef} onScroll={updateScrollHint}>
+          <div className="awareness-header">
+            <div className="awareness-header-icon">📢</div>
+            <h2>Patient Awareness Platform</h2>
+            <p>Important Patient Information and Disclaimer</p>
+          </div>
 
-        <div className="awareness-tabs">
-          {awarenessData.map((item, index) => (
-            <button
-              key={index}
-              className={`awareness-tab ${activeTab === index ? 'active' : ''}`}
-              onClick={() => setActiveTab(index)}
-              style={{ '--tab-color': item.color } as React.CSSProperties}
-            >
-              <span className="tab-icon">{item.icon}</span>
-              <span className="tab-title">{item.title}</span>
+          <div className="awareness-tabs">
+            {awarenessData.map((item, index) => (
+              <button
+                key={index}
+                className={`awareness-tab ${activeTab === index ? 'active' : ''}`}
+                onClick={() => setActiveTab(index)}
+                style={{ '--tab-color': item.color } as React.CSSProperties}
+              >
+                <span className="tab-icon">{item.icon}</span>
+                <span className="tab-title">{item.title}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="awareness-content">
+            <div className="content-card" style={{ borderLeftColor: awarenessData[activeTab].color }}>
+              <div className="content-icon">{awarenessData[activeTab].icon}</div>
+              <h3>{awarenessData[activeTab].title}</h3>
+              <p>{awarenessData[activeTab].content}</p>
+            </div>
+          </div>
+
+          <div className="awareness-footer">
+            <div className="footer-info">
+              <p>
+                <strong>Need Help?</strong> Contact Ashish Tripathi at{' '}
+                <a href="mailto:Ash.intas@gmail.com">Ash.intas@gmail.com</a>
+              </p>
+              <p className="footer-note">
+                This is a social initiative in collaboration with Bharat AI Research Center, Hisar
+              </p>
+            </div>
+            <button className="close-btn" onClick={() => setIsVisible(false)}>
+              I Understand - Continue to Website
             </button>
-          ))}
-        </div>
-
-        <div className="awareness-content">
-          <div className="content-card" style={{ borderLeftColor: awarenessData[activeTab].color }}>
-            <div className="content-icon">{awarenessData[activeTab].icon}</div>
-            <h3>{awarenessData[activeTab].title}</h3>
-            <p>{awarenessData[activeTab].content}</p>
           </div>
         </div>
 
-        <div className="awareness-footer">
-          <div className="footer-info">
-            <p>
-              <strong>Need Help?</strong> Contact Ashish Tripathi at{' '}
-              <a href="mailto:Ash.intas@gmail.com">Ash.intas@gmail.com</a>
-            </p>
-            <p className="footer-note">
-              This is a social initiative in collaboration with Bharat AI Research Center, Hisar
-            </p>
+        {showScrollHint && (
+          <div className="scroll-hint-layer">
+            <button
+              type="button"
+              className="scroll-hint"
+              onClick={handleScrollDown}
+              aria-label="Scroll down to read more and continue to the website"
+            >
+              <span className="scroll-hint-text">Scroll down for more</span>
+              <span className="scroll-hint-chevrons" aria-hidden="true">
+                <span className="chevron" />
+                <span className="chevron" />
+              </span>
+            </button>
           </div>
-          <button className="close-btn" onClick={() => setIsVisible(false)}>
-            I Understand - Continue to Website
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

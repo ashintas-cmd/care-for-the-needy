@@ -13,6 +13,12 @@
 # Firebase
 .firebase/
 
+# Playwright
+/test-results
+/playwright-report
+/playwright-artifacts/
+.playwright-cli/
+
 # Misc
 .DS_Store
 .env.local
